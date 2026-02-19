@@ -1,0 +1,32 @@
+    -include $(GENERAL_RULES)/mplibType
+
+EXE_INC = \
+    -I$(LIB_SRC)/finiteVolume/lnInclude \
+    -I$(LIB_SRC)/meshTools/lnInclude \
+    -I$(LIB_SRC)/parallel/parallel/lnInclude \
+    -I$(LIB_SRC)/parallel/decompose/decompositionMethods/lnInclude \
+    -I$(LIB_SRC)/parallel/decompose/metis/lnInclude \
+    -I$(LIB_SRC)/parallel/decompose/scotch/lnInclude \
+    -I$(LIB_SRC)/lagrangian/basic/lnInclude \
+    -I$(WM_THIRD_PARTY_DIR)/platforms/$(WM_ARCH)/include \
+    $(PFLAGS) $(PINC) \
+    -I$(SCOTCH_ARCH_PATH)/include \
+    -I$(or $(SCOTCH_INCLUDE_DIR),/usr/include/scotch)
+
+EXE_LIBS = \
+    -lfiniteVolume \
+    -lgenericFvFields \
+    -lmeshTools \
+    -lparallel \
+    -ldecompositionMethods \
+    -lmetis \
+    -lscotchDecomp \
+    -llagrangian \
+    -lgenericFvFields \
+    -L$(WM_THIRD_PARTY_DIR)/platforms/$(WM_ARCH)/lib -lmetis \
+    -L$(SCOTCH_ARCH_PATH)/lib \
+    $(if $(SCOTCH_LIB_DIR),-L$(SCOTCH_LIB_DIR)) \
+    -L$(FOAM_EXT_LIBBIN) \
+    -lscotch \
+    -lscotcherrexit \
+    -lrt

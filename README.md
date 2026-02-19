@@ -46,7 +46,7 @@ This utility analyzes the processor patch structure of a given decomposition and
 Create the directory 
 
 ```
-$WM_PROJECT_USER_DIR/applications
+$WM_PROJECT_USER_DIR/utilities
 ```
 Copy the `optimizeCommPar` directory into it.
 

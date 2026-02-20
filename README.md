@@ -46,7 +46,7 @@ This utility analyzes the processor patch structure of a given decomposition and
 Create the directory 
 
 ```
-$WM_PROJECT_USER_DIR/utilities
+$WM_PROJECT_USER_DIR/applications
 ```
 Copy the `optimizeCommPar` directory into it.
 
@@ -88,25 +88,41 @@ Add the following sub-dictionary to:
 system/decomposeParDict
 ```
 
+Example:
 ```cpp
 optimizeCommCoeffs
 {
-    procPerNode     48;
-    numaDomains     1;
+    procPerNode     24;
+    numaDomains     2;
     numaNodes       4;
 
     version         0;
 
-    domainList      (0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0);
-    numaList        (0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 2 2 3 3 3 3 3 3 3 3 3 3 3 3);
+    domainList      (0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1);
+    numaList        (0 0 0 0 1 1 1 1 2 2 2 2 3 3 3 3 0 0 0 0 1 1 1 1 2 2 2 2 3 3 3 3);
 }
 ```
 
 ### Parameter Description
 
 - `procPerNode` – Number of cores per compute node  
-- `numaDomains` – Number of NUMA domains per node  
-- `numaNodes` – Number of NUMA nodes per node  
+- `numaDomains` – Number of NUMA domains per compute node  
+- `numaNodes` – Number of NUMA nodes per NUMA domain  
+
+The number of cores per NUMA node is therefore
+
+```
+procPerNode / (numaDomains * numaNodes)
+```
+
+The arrays `domainList` and `numaList` must accurately reflect the actual hardware topology. NUMA domains are indexed from `0` to `numaDomains - 1`. Within each NUMA domain, NUMA nodes are indexed from `0` to `numaNodes - 1`.
+
+These lists must represent the exact mapping of cores to NUMA domains and NUMA nodes. The required hardware information can be obtained, for example, using:
+
+```
+lscpu
+numactl --hardware
+```
 
 ### Optimization Modes
 
@@ -115,8 +131,6 @@ optimizeCommCoeffs
 | `0` | Local + Global communication optimization |
 | `1` | Random rank file (testing only) |
 | `2` | Global communication optimization only |
-
-`domainList` and `numaList` must reflect the actual hardware topology.
 
 ---
 
@@ -150,12 +164,12 @@ decomposePar
 
 ### Local + Global Optimization
 
-For local and global communication optimization in the SLURM job script the utility has to be executed 
-and then the according OpenFOAM solver can be executed with the flag -rf ./constant/rankFile like:
+For local and global communication optimization, first execute the utility in the same SLURM job script. 
+Then start the OpenFOAM solver with the generated rank file using `-rf ./constant/rankFile`, for example:
 
 ```bash
-mpirun -np 48 optimizeCommPar -parallel > log.optimizeCommPar
-mpirun -rf ./constant/rankFile -np 48 foamRun -parallel > log.foamRun
+mpirun -np 24 optimizeCommPar -parallel > log.optimizeCommPar
+mpirun -rf ./constant/rankFile -np 24 foamRun -parallel > log.foamRun
 ```
 
 ---
@@ -167,8 +181,8 @@ mpirun -rf ./constant/rankFile -np 48 foamRun -parallel > log.foamRun
 3. Run:
 
 ```bash
-mpirun -np 48 optimizeCommPar -parallel > log.optimizeCommPar
-mpirun -bind-to core -np 48 foamRun -parallel > log.foamRun
+mpirun -np 24 optimizeCommPar -parallel > log.optimizeCommPar
+mpirun -bind-to core -np 24 foamRun -parallel > log.foamRun
 ```
 
 The SLURM job headers must be adapted to your HPC system.
@@ -177,8 +191,11 @@ The SLURM job headers must be adapted to your HPC system.
 
 ## Test Cases
 
-The `run/` directory contains four test cases with the according `prepare.sh` for setup
-and SLURM job scripts for different optimization modes
+The `run/` directory contains the four test cases presented in the paper, configured for the respective HPC systems.
+It also includes the corresponding `prepare.sh` setup script and SLURM job scripts for the different optimization modes.
+
+The provided case configurations are set up for execution on two compute nodes. 
+For different node counts, only the `decomposeParDict` and the corresponding SLURM job scripts need to be adapted accordingly.
 
 ---
 
@@ -194,4 +211,4 @@ and SLURM job scripts for different optimization modes
 ## Disclaimer
 
 This software modifies internal OpenFOAM communication components.  
-Use at your own risk and validate results carefully. 
+Use at your own risk and validate results carefully.

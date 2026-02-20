@@ -149,6 +149,8 @@ OptimisationSwitches
 }
 ```
 
+If the optimization switch is set to use a custom communication schedule but no `./constant/communicationSchedule` file is present, OpenFOAM automatically falls back to the default communication schedule.
+
 ---
 
 ## Running Cases
@@ -164,8 +166,9 @@ decomposePar
 
 ### Local + Global Optimization
 
-For local and global communication optimization, first execute the utility in the same SLURM job script. 
-Then start the OpenFOAM solver with the generated rank file using `-rf ./constant/rankFile`, for example:
+For combined local and global communication optimization, set `version 0` in `optimizeCommCoeffs` and set the optimization switch in `controlDict` to `3`.
+
+Within the same SLURM job script, first execute the utility and then launch the OpenFOAM solver using the generated rank file with the option `-rf ./constant/rankFile`, for example:
 
 ```bash
 mpirun -np 24 optimizeCommPar -parallel > log.optimizeCommPar
@@ -175,6 +178,8 @@ mpirun -rf ./constant/rankFile -np 24 foamRun -parallel > log.foamRun
 ---
 
 ### Global Optimization Only
+
+For global communication optimization only, set `version 2` in `optimizeCommCoeffs` and set the optimization switch in `controlDict` to `3`.
 
 1. Determine the MPI rank-to-core mapping using `reportBindings.sh`
 2. Place `reportBindings.txt` in the case directory

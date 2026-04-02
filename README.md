@@ -217,3 +217,42 @@ For different node counts, only the `decomposeParDict` and the corresponding SLU
 
 This software modifies internal OpenFOAM communication components.  
 Use at your own risk and validate results carefully.
+
+---
+
+## Appendix A – Point-to-Point Communication Test
+
+The point-to-point communication tests described in Section 3.1 of the paper were performed using the custom utility `detectArchPar`.
+
+The utility is compiled and executed in the same way as `optimizeCommPar` on a prepared OpenFOAM case. In addition, the following parameters must be specified in the `optimizeCommCoeffs` subdictionary:
+
+- `testSize` – Size of the scalar list to be communicated
+- `testIterations` – Number of test iterations
+
+During execution, the utility measures the communication time between all pairs of participating processes. The mean communication times are written to the file `timeMatrix.csv` in matrix form for further analysis.
+
+---
+
+## Appendix B - Repository Structure
+
+The repository is organized as follows:
+
+```text
+TopologyAwareCommOptimization/
+├── run/
+│   ├── LEC/
+│   └── VSC/
+├── src/
+├── utilities/
+│   ├── detectArchPar/
+│   └── optimizeCommPar/
+└── README.md
+```
+
+
+- `optimizeCommPar/` contains the main utility for generating optimized rank mappings and communication schedules.
+- `detectArchPar/` provides benchmarking tools to measure communication performance across hardware topology levels.
+- `src/` includes the required modifications to the OpenFOAM communication layer.
+- `LEC/` contains the test cases and configurations used for evaluation on the LEC cluster.
+- `VSC/` contains the test cases and configurations used for evaluation on the VSC cluster.
+

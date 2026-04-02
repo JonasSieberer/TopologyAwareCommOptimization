@@ -1773,6 +1773,32 @@ int main(int argc, char *argv[])
 
     calcCommunicator(cfg.result, domainResult, numaResult, runTime);
 
+
+    fileName rankFilePath("rankFileCanonical");
+
+    Info<< "Writing MPI rankfile to " << rankFilePath << nl;
+
+    OFstream rankFile(rankFilePath);
+
+    if (!rankFile.good())
+    {
+        FatalErrorInFunction
+            << "Failed to create rankfile at "
+            << rankFilePath << exit(FatalError);
+    }
+
+    for (label nodei = 0; nodei < nodeList.size(); nodei++)
+    {
+        for (label sloti = 0; sloti < cfg.procPN; sloti++)
+        {
+            rankFile << "rank " << nodei*cfg.procPN+sloti << "=" << nodeList[nodei].c_str();
+            rankFile << " slot=" << sloti << "\n";
+        }
+    }
+
+
+
+
     Info << "\nEnd" << endl;
 
     }
